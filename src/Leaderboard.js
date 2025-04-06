@@ -28,11 +28,11 @@ export default function Leaderboard() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4 text-center">Masters Pool Leaderboard</h1>
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-center">Masters Pool Leaderboard</h1>
       <input
         placeholder="Search by entry name..."
-        className="mb-6 border p-2 w-full"
+        className="mb-4 border p-2 w-full text-sm sm:text-base"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
@@ -43,7 +43,7 @@ export default function Leaderboard() {
               <h2 className="text-xl font-semibold">{index + 1}. {entry.name}</h2>
               <div className="text-lg font-bold">{entry.score}</div>
             </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:text-base">
               {entry.golfers.map((g, i) => (
                 <div key={i} className="flex justify-between">
                   <span>{g}</span>
