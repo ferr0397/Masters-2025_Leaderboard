@@ -1,13 +1,19 @@
 {
-    "headers": [
-      {
-        "source": "/(.*)",
-        "headers": [
-          {
-            "key": "X-Frame-Options",
-            "value": ""
-          }
-        ]
-      }
-    ]
-  }
+  "buildCommand": "npm install && npm run build",
+  "ignoreCommand": "echo Ignoring cached node_modules",
+  "cleanUrls": true,
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
+  "functions": {},
+  "routes": [],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}
