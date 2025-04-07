@@ -3,7 +3,6 @@
   "ignoreCommand": "echo Ignoring cached node_modules",
   "cleanUrls": true,
   "rewrites": [{ "source": "/(.*)", "destination": "/" }],
-  "functions": {},
   "routes": [],
   "headers": [
     {
