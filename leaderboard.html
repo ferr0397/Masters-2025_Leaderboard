@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masters Pool Leaderboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+    .entry {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .golfers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      margin-top: 8px;
+    }
+    .golfers div {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+    .note {
+      font-size: 14px;
+      color: gray;
+      text-align: center;
+      margin-top: -10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Masters Pool Leaderboard</h1>
+  <p class="note">Full leaderboard with picks will be available when play starts.</p>
+  <input type="text" id="search" placeholder="Search by entry name..." oninput="renderLeaderboard()">
+  <div id="leaderboard">Loading...</div>
+
+  <script>
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZRYVfTCyD1V-ZkpAJALuN7fUNWz-GRTCY4p-Ci1U84O3ahn0if36VecchzN3k6Xjt1IYXHF6aKNYJ/pub?output=csv";
+
+    let allEntries = [];
+
+    fetch(SHEET_URL)
+      .then(res => res.text())
+      .then(text => {
+        const rows = text.split('\n').slice(1);
+        allEntries = rows.map(row => row.split(',')).filter(r => r[0]).map(r => ({
+          name: r[0].replaceAll('""', '"').replace(/^"|"$/g, ''),
+          score: parseFloat(r[15]) || 0,
+          golfers: [
+            [r[1], r[2]],
+            [r[3], r[4]],
+            [r[5], r[6]],
+            [r[7], r[8]],
+            [r[9], r[10]],
+            [r[11], r[12]],
+            [r[13], r[14]],
+            [r[15], r[16]]
+          ]
+        })).sort((a, b) => a.score - b.score);
+        renderLeaderboard();
+      })
+      .catch(() => {
+        document.getElementById("leaderboard").innerText = "Error loading leaderboard.";
+      });
+
+    function renderLeaderboard() {
+      const search = document.getElementById("search").value.toLowerCase();
+      const filtered = allEntries.filter(e => e.name.toLowerCase().includes(search));
+
+      const html = filtered.map((entry, i) => `
+        <div class="entry">
+          <div class="entry-header">
+            <span>${i + 1}. ${entry.name}</span>
+            <span>Total: ${entry.score}</span>
+          </div>
+          <div class="golfers">
+            ${entry.golfers.map(g => `<div><span>${g[0]}</span><span>${g[1]}</span></div>`).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById("leaderboard").innerHTML = html || "No entries found.";
+    }
+  </script>
+</body>
+</html>
