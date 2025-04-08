@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Jacket Junkies - Current Entries</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+    h1 {
+      color: #2e7d32;
+    }
+    #entryNote {
+      font-size: 0.95rem;
+      color: #666;
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    #entryCount {
+      font-weight: bold;
+      margin-bottom: 2rem;
+      color: #555;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    li {
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏌️ Current Pool Entries</h1>
+  <div id="entryNote">Full leaderboard with picks will be available when play starts.</div>
+  <div id="entryCount">Loading total entries...</div>
+  <ul id="entryList">
+    <li>Loading...</li>
+  </ul>
+
+  <script>
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZRYVfTCyD1V-ZkpAJALuN7fUNWz-GRTCY4p-Ci1U84O3ahn0if36VecchzN3k6Xjt1IYXHF6aKNYJ/pub?gid=1221913713&single=true&output=csv";
+
+    fetch(sheetUrl)
+      .then(res => res.text())
+      .then(data => {
+        const rows = data.split("\n");
+        const entryNames = new Set();
+        rows.slice(1).forEach(row => {
+          let name = row.split(",")[0].trim();
+          if (name.startsWith('"') && name.endsWith('"')) {
+            name = name.slice(1, -1); // remove outer quotes
+          }
+          name = name.replace(/""/g, '"'); // convert double quotes to single
+          if (name) entryNames.add(name);
+        });
+
+        const list = document.getElementById("entryList");
+        const entryCount = document.getElementById("entryCount");
+        list.innerHTML = "";
+
+        if (entryNames.size === 0) {
+          list.innerHTML = "<li>No entries yet</li>";
+          entryCount.textContent = "No entries submitted yet.";
+        } else {
+          entryCount.textContent = `Total Entries: ${entryNames.size}`;
+          Array.from(entryNames).forEach(name => {
+            const li = document.createElement("li");
+            li.textContent = name;
+            list.appendChild(li);
+          });
+        }
+      })
+      .catch(err => {
+        document.getElementById("entryList").innerHTML = "<li>Error loading entries.</li>";
+        document.getElementById("entryCount").textContent = "Error fetching entry count.";
+        console.error("Failed to load entry names:", err);
+      });
+  </script>
+</body>
+</html>

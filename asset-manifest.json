@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Masters-2025_Leaderboard/static/css/main.8792693e.css",
+    "main.js": "/Masters-2025_Leaderboard/static/js/main.945a36a5.js",
+    "index.html": "/Masters-2025_Leaderboard/index.html",
+    "main.8792693e.css.map": "/Masters-2025_Leaderboard/static/css/main.8792693e.css.map",
+    "main.945a36a5.js.map": "/Masters-2025_Leaderboard/static/js/main.945a36a5.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.8792693e.css",
+    "static/js/main.945a36a5.js"
+  ]
+}
