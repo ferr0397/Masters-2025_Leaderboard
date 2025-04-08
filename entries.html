@@ -60,7 +60,11 @@
         const rows = data.split("\n");
         const entryNames = new Set();
         rows.slice(1).forEach(row => {
-          const name = row.split(",")[0].trim();
+          let name = row.split(",")[0].trim();
+          if (name.startsWith('"') && name.endsWith('"')) {
+            name = name.slice(1, -1); // remove outer quotes
+          }
+          name = name.replace(/""/g, '"'); // convert double quotes to single
           if (name) entryNames.add(name);
         });
 
