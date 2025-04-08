@@ -13,7 +13,9 @@ export default function Leaderboard() {
         const rows = text.split("\n").slice(1);
         const data = rows.map((row) => row.split(","));
         const parsed = data.map((r) => ({
-          name: r[0],
+          name: r[0]
+            .replace(/^"(.*)"$/, "$1")     // remove outer quotes
+            .replace(/""/g, '"'),          // fix double inner quotes
           score: parseFloat(r[15]) || 0,
           golfers: [r[1], r[3], r[5], r[7], r[9], r[11], r[13]],
           golferScores: [r[2], r[4], r[6], r[8], r[10], r[12], r[14]],
