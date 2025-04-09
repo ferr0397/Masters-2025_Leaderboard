@@ -38,10 +38,10 @@
       justify-content: space-between;
       font-weight: bold;
       font-size: 18px;
+      display: grid;
       color: #1e3d14;
     }
     .golfers {
-      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px 40px;
       margin-top: 8px;
@@ -92,7 +92,6 @@
           ]
         }));
 
-        // Sort and assign ranks
         parsed.sort((a, b) => a.score - b.score);
         const ranked = [];
         let prevScore = null;
@@ -103,15 +102,14 @@
           if (entry.score === prevScore) {
             skip++;
             entry.rank = `T-${place}`;
+            // Update previous tied entries retroactively
+            if (skip === 1) {
+              ranked[i - 1].rank = `T-${place}`;
+            }
           } else {
             place = i + 1;
             entry.rank = `${place}`;
-            if (skip > 0) {
-              for (let j = i - skip; j < i; j++) {
-                ranked[j].rank = `T-${place - skip}`;
-              }
-              skip = 0;
-            }
+            skip = 0;
           }
           prevScore = entry.score;
           ranked.push(entry);
