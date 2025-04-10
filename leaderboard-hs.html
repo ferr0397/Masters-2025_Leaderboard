@@ -8,54 +8,65 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f7f7f7;
+      background: #f9f9f9;
       color: #333;
-      max-width: 700px;
+      max-width: 960px;
       margin: auto;
     }
     h1 {
       font-size: 28px;
       text-align: center;
       color: #2e7d32;
+      margin-bottom: 5px;
     }
     .note {
       text-align: center;
       font-size: 14px;
       color: #777;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
     input {
       width: 100%;
-      padding: 8px;
-      margin: 16px 0;
+      padding: 10px;
       font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
     }
     .entry {
-      background: white;
+      background: #fff;
+      border-radius: 8px;
       border: 1px solid #ddd;
-      border-left: 5px solid #2e7d32;
-      margin: 10px 0;
-      padding: 10px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    .entry h2 {
-      font-size: 18px;
-      margin: 0;
-    }
-    .entry .score {
-      float: right;
-      font-weight: bold;
-    }
-    .entry .rank {
-      font-weight: bold;
-      color: #2e7d32;
-      margin-right: 6px;
-    }
-    .golfer {
+    .entry-header {
       display: flex;
       justify-content: space-between;
-      font-family: monospace;
+      align-items: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .rank {
+      color: #2e7d32;
+      margin-right: 8px;
+    }
+    .golfer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 20px;
       font-size: 14px;
+      font-family: monospace;
+    }
+    .golfer-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    @media (max-width: 600px) {
+      .golfer-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -72,12 +83,14 @@
       const res = await fetch(url);
       const text = await res.text();
       return text.split("\n").slice(1).map(row => {
-        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
+        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c =>
+          c.replace(/^"|"$/g, '').replace(/""/g, '"')
+        );
         return {
           name: cols[0],
-          score: parseFloat(cols[15]) || 0,
           golfers: [cols[1], cols[3], cols[5], cols[7], cols[9], cols[11], cols[13], cols[15]],
           golferScores: [cols[2], cols[4], cols[6], cols[8], cols[10], cols[12], cols[14], cols[16]],
+          score: parseFloat(cols[17]) || 0,
         };
       }).filter(e => e.name);
     }
@@ -89,6 +102,7 @@
         if (entry.score !== lastScore) {
           rank = i + 1;
           lastScore = entry.score;
+          offset = 0;
         } else {
           offset++;
         }
@@ -105,8 +119,17 @@
           const div = document.createElement("div");
           div.className = "entry";
           div.innerHTML = `
-            <h2><span class="rank">${entry.rank}</span>${entry.name}<span class="score">${entry.score}</span></h2>
-            ${entry.golfers.map((g, i) => `<div class="golfer"><span>${g}</span><span>${entry.golferScores[i]}</span></div>`).join("")}
+            <div class="entry-header">
+              <span><span class="rank">${entry.rank}.</span> ${entry.name}</span>
+              <span>${entry.score}</span>
+            </div>
+            <div class="golfer-grid">
+              ${entry.golfers.map((g, i) => `
+                <div class="golfer-row">
+                  <span>${g}</span>
+                  <span>${entry.golferScores[i]}</span>
+                </div>`).join("")}
+            </div>
           `;
           board.appendChild(div);
         });
