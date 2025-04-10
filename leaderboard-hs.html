@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>High Stakes Leaderboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f7f7f7;
+      color: #333;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 28px;
+      text-align: center;
+      color: #2e7d32;
+    }
+    .note {
+      text-align: center;
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 16px 0;
+      font-size: 16px;
+    }
+    .entry {
+      background: white;
+      border: 1px solid #ddd;
+      border-left: 5px solid #2e7d32;
+      margin: 10px 0;
+      padding: 10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .entry h2 {
+      font-size: 18px;
+      margin: 0;
+    }
+    .entry .score {
+      float: right;
+      font-weight: bold;
+    }
+    .entry .rank {
+      font-weight: bold;
+      color: #2e7d32;
+      margin-right: 6px;
+    }
+    .golfer {
+      display: flex;
+      justify-content: space-between;
+      font-family: monospace;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>High Stakes Leaderboard</h1>
+  <div class="note">Live scores update automatically throughout the tournament.</div>
+  <input type="text" id="search" placeholder="Search entry name..." />
+  <div id="leaderboard"></div>
+
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZRYVfTCyD1V-ZkpAJALuN7fUNWz-GRTCY4p-Ci1U84O3ahn0if36VecchzN3k6Xjt1IYXHF6aKNYJ/pub?gid=1273779999&single=true&output=csv";
+
+    async function fetchCSV(url) {
+      const res = await fetch(url);
+      const text = await res.text();
+      return text.split("\n").slice(1).map(row => {
+        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
+        return {
+          name: cols[0],
+          score: parseFloat(cols[15]) || 0,
+          golfers: [cols[1], cols[3], cols[5], cols[7], cols[9], cols[11], cols[13], cols[15]],
+          golferScores: [cols[2], cols[4], cols[6], cols[8], cols[10], cols[12], cols[14], cols[16]],
+        };
+      }).filter(e => e.name);
+    }
+
+    function calculateRanks(entries) {
+      const sorted = [...entries].sort((a, b) => a.score - b.score);
+      let rank = 1, lastScore = null, offset = 0;
+      return sorted.map((entry, i) => {
+        if (entry.score !== lastScore) {
+          rank = i + 1;
+          lastScore = entry.score;
+        } else {
+          offset++;
+        }
+        return { ...entry, rank: offset > 0 ? `T-${rank}` : `${rank}` };
+      });
+    }
+
+    function render(entries, filter = "") {
+      const board = document.getElementById("leaderboard");
+      board.innerHTML = "";
+      entries
+        .filter(e => e.name.toLowerCase().includes(filter.toLowerCase()))
+        .forEach(entry => {
+          const div = document.createElement("div");
+          div.className = "entry";
+          div.innerHTML = `
+            <h2><span class="rank">${entry.rank}</span>${entry.name}<span class="score">${entry.score}</span></h2>
+            ${entry.golfers.map((g, i) => `<div class="golfer"><span>${g}</span><span>${entry.golferScores[i]}</span></div>`).join("")}
+          `;
+          board.appendChild(div);
+        });
+    }
+
+    async function init() {
+      const data = await fetchCSV(CSV_URL);
+      const ranked = calculateRanks(data);
+      render(ranked);
+
+      document.getElementById("search").addEventListener("input", (e) => {
+        render(ranked, e.target.value);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
