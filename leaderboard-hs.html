@@ -95,20 +95,23 @@
       }).filter(e => e.name);
     }
 
-    function calculateRanks(entries) {
-      const sorted = [...entries].sort((a, b) => a.score - b.score);
-      let rank = 1, lastScore = null, offset = 0;
-      return sorted.map((entry, i) => {
-        if (entry.score !== lastScore) {
-          rank = i + 1;
-          lastScore = entry.score;
-          offset = 0;
-        } else {
-          offset++;
-        }
-        return { ...entry, rank: offset > 0 ? `T-${rank}` : `${rank}` };
-      });
+function calculateRanks(entries) {
+  const sorted = [...entries].sort((a, b) => a.score - b.score);
+  let rank = 1;
+  let lastScore = null;
+  let sameRankCount = 0;
+  return sorted.map((entry, i) => {
+    if (entry.score === lastScore) {
+      sameRankCount++;
+    } else {
+      rank = i + 1;
+      sameRankCount = 1;
     }
+    lastScore = entry.score;
+    const displayRank = sameRankCount > 1 ? `T-${rank}` : `T-${rank}`;
+    return { ...entry, rank: displayRank };
+  });
+}
 
     function render(entries, filter = "") {
       const board = document.getElementById("leaderboard");
