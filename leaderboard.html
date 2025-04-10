@@ -74,12 +74,45 @@
 
     let allEntries = [];
 
+    function parseCSV(text) {
+      const rows = [];
+      let current = [], inQuotes = false, field = '';
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i], next = text[i + 1];
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            field += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          current.push(field);
+          field = '';
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (field || current.length) {
+            current.push(field);
+            rows.push(current);
+            current = [];
+            field = '';
+          }
+        } else {
+          field += char;
+        }
+      }
+      if (field || current.length) {
+        current.push(field);
+        rows.push(current);
+      }
+      return rows;
+    }
+
     fetch(SHEET_URL)
       .then(res => res.text())
       .then(text => {
-        const rows = text.split('\n').slice(1);
-        const parsed = rows.map(row => row.split(',')).filter(r => r[0]).map(r => ({
-          name: r[0].replaceAll('""', '"').replace(/^"|"$/g, ''),
+        const data = parseCSV(text).slice(1).filter(r => r[0]);
+        const parsed = data.map(r => ({
+          name: r[0].replace(/^"|"$/g, ''),
           score: parseFloat(r[17]) || 0,
           golfers: [
             [r[1], r[2] || ""],
